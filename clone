@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+
+function onEnd(name) {
+    return function(err) {
+        if (err) return console.error(err);
+        console.log("copied " + name);
+    };
+}
+
+function copy(file) {
+    fs.copy(path.resolve(file), path.join(targetPath, file), onEnd(file));
+}
+
+function write(file, content) {
+    fs.outputFile(path.join(targetPath, file), content, onEnd(file));
+}
+
+var fs = require("fs-extra"),
+    targetPath = process.argv[2],
+    path = require("path");
+
+if (!targetPath) {
+    console.log("expecting target path");
+    return;
+}
+
+targetPath = path.resolve(targetPath);
+
+fs.ensureDirSync(targetPath);
+
+[
+    "webpack.config.js",
+    "src",
+    "dist",
+    ".gitignore"
+].forEach(function(file) {
+    copy(file);
+});
+
+var packageJson = JSON.parse(String(fs.readFileSync("package.json")));
+packageJson.name = path.basename(targetPath);
+write("package.json", JSON.stringify(packageJson));
+
