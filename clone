@@ -8,11 +8,15 @@ function onEnd(name) {
 }
 
 function copy(file) {
-    fs.copy(path.resolve(file), path.join(targetPath, file), onEnd(file));
+    fs.copy(srcFile(file), path.join(targetPath, file), onEnd(file));
 }
 
 function write(file, content) {
     fs.outputFile(path.join(targetPath, file), content, onEnd(file));
+}
+
+function srcFile(file) {
+    return path.join(__dirname, file);
 }
 
 var fs = require("fs-extra"),
@@ -37,7 +41,7 @@ fs.ensureDirSync(targetPath);
     copy(file);
 });
 
-var packageJson = JSON.parse(String(fs.readFileSync("package.json")));
+var packageJson = JSON.parse(String(fs.readFileSync(srcFile("package.json"))));
 packageJson.name = path.basename(targetPath);
 write("package.json", JSON.stringify(packageJson));
 
